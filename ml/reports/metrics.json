@@ -1,0 +1,184 @@
+{
+  "dataset": {
+    "original_rows": 284807,
+    "original_class_counts": {
+      "0": 284315,
+      "1": 492
+    },
+    "rows_after_deduplication": 283726,
+    "exact_duplicates_removed": 1081,
+    "class_counts_after_deduplication": {
+      "0": 283253,
+      "1": 473
+    },
+    "filename": "creditcard.csv",
+    "sha256": "76274b691b16a6c49d3f159c883398e03ccd6d1ee12d9d8ee38f4b4b98551a89"
+  },
+  "split_strategy": "chronological_60_20_20_no_shared_timestamps_after_exact_deduplication",
+  "splits": {
+    "train": {
+      "rows": 170235,
+      "class_counts": {
+        "0": 169893,
+        "1": 342
+      },
+      "time_min": 0.0,
+      "time_max": 120392.0
+    },
+    "validation": {
+      "rows": 56745,
+      "class_counts": {
+        "0": 56688,
+        "1": 57
+      },
+      "time_min": 120393.0,
+      "time_max": 145233.0
+    },
+    "test": {
+      "rows": 56746,
+      "class_counts": {
+        "0": 56672,
+        "1": 74
+      },
+      "time_min": 145234.0,
+      "time_max": 172792.0
+    }
+  },
+  "model": {
+    "version": "ulb-logreg-v1",
+    "schema_version": 1,
+    "algorithm": "StandardScaler + LogisticRegression",
+    "features": [
+      "Time",
+      "V1",
+      "V2",
+      "V3",
+      "V4",
+      "V5",
+      "V6",
+      "V7",
+      "V8",
+      "V9",
+      "V10",
+      "V11",
+      "V12",
+      "V13",
+      "V14",
+      "V15",
+      "V16",
+      "V17",
+      "V18",
+      "V19",
+      "V20",
+      "V21",
+      "V22",
+      "V23",
+      "V24",
+      "V25",
+      "V26",
+      "V27",
+      "V28",
+      "Amount"
+    ],
+    "class_weight": "balanced",
+    "solver": "lbfgs",
+    "max_iter": 2000,
+    "random_state": 42,
+    "threshold": 0.9999922476121025,
+    "threshold_selection": "maximum_validation_f1_ties_choose_lowest_threshold",
+    "refit_after_validation": false,
+    "score_is_calibrated_probability": false,
+    "sha256": "81d46ac60991509ab497808727b40183edf723fad7f808a85f2a41dfc501ef39"
+  },
+  "environment": {
+    "python": "3.14.7",
+    "numpy": "2.4.2",
+    "scipy": "1.17.1",
+    "scikit_learn": "1.8.0",
+    "joblib": "1.5.3"
+  },
+  "validation": {
+    "precision": 0.9302325581395349,
+    "recall": 0.7017543859649122,
+    "f1": 0.8,
+    "average_precision": 0.7726808523329118,
+    "roc_auc": 0.9709258062599344,
+    "accuracy": 0.9996475460392986,
+    "confusion_matrix": [
+      [
+        56685,
+        3
+      ],
+      [
+        17,
+        40
+      ]
+    ],
+    "confusion_matrix_labels": [
+      0,
+      1
+    ]
+  },
+  "test": {
+    "precision": 0.9423076923076923,
+    "recall": 0.6621621621621622,
+    "f1": 0.7777777777777778,
+    "average_precision": 0.7474592161114845,
+    "roc_auc": 0.9818135558624689,
+    "accuracy": 0.9995065731505305,
+    "confusion_matrix": [
+      [
+        56669,
+        3
+      ],
+      [
+        25,
+        49
+      ]
+    ],
+    "confusion_matrix_labels": [
+      0,
+      1
+    ]
+  },
+  "baseline_always_legitimate": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "average_precision": 0.0013040566735981391,
+    "roc_auc": 0.5,
+    "accuracy": 0.9986959433264019,
+    "confusion_matrix": [
+      [
+        56672,
+        0
+      ],
+      [
+        74,
+        0
+      ]
+    ],
+    "confusion_matrix_labels": [
+      0,
+      1
+    ]
+  },
+  "examples": {
+    "legitima.json": {
+      "selection": "first_test_row_with_this_true_class",
+      "dataset_record_index_zero_based": 227820,
+      "csv_line_number_including_header": 227822,
+      "true_class": 0,
+      "predicted_class": 0,
+      "score": 0.017396687368755874
+    },
+    "fraude.json": {
+      "selection": "first_test_row_with_this_true_class",
+      "dataset_record_index_zero_based": 229712,
+      "csv_line_number_including_header": 229714,
+      "true_class": 1,
+      "predicted_class": 1,
+      "score": 0.9999999999964237
+    }
+  }
+}

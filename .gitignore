@@ -1,0 +1,9 @@
+# Ambiente e artefatos locais de Python/ML
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+/ml/data/*.csv
+/ml/data/*.part
+/ml/models/*.pkl
+
