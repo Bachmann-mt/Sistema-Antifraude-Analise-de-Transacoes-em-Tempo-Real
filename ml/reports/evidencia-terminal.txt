@@ -1,0 +1,10 @@
+EVIDENCIA DE EXECUCAO LOCAL - MLOPS
+Registro textual de comandos reais; o print da tela deve ser capturado no terminal.
+
+PS> .\ml\.venv\Scripts\python.exe ml/predict.py --input ml/examples/legitima.json
+{"status": "APROVADO", "score_fraude": 0.017396687368755874, "limiar": 0.9999922476121025, "modelo": "ulb-logreg-v1"}
+Codigo de saida: 0
+
+PS> .\ml\.venv\Scripts\python.exe ml/predict.py --input ml/examples/fraude.json
+{"status": "FRAUDE", "score_fraude": 0.9999999999964237, "limiar": 0.9999922476121025, "modelo": "ulb-logreg-v1"}
+Codigo de saida: 0
