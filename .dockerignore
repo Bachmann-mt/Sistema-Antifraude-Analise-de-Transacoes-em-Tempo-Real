@@ -1,0 +1,16 @@
+# Lista explícita: não envia dataset, modelo local, venv, Git ou IDE ao build.
+**
+!Dockerfile
+!.dockerignore
+!ml/
+!ml/common.py
+!ml/predict.py
+!ml/download_data.py
+!ml/train.py
+!ml/requirements.txt
+!ml/contracts/
+!ml/contracts/*.schema.json
+!br.com.faculdadedonaduzzi/
+!br.com.faculdadedonaduzzi/pom.xml
+!br.com.faculdadedonaduzzi/src/
+!br.com.faculdadedonaduzzi/src/**
