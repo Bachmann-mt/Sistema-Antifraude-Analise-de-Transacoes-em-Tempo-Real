@@ -1,4 +1,3 @@
-# O mesmo runtime Python serve à inferência isolada e ao ProcessBuilder da API.
 FROM python:3.14-slim-bookworm AS ml-base
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -14,15 +13,12 @@ COPY ml/requirements.txt ./requirements.txt
 RUN python -m venv /opt/venv \
     && /opt/venv/bin/python -m pip install --no-cache-dir -r requirements.txt
 
-# Recria o modelo mesmo em um clone sem CSV, .venv ou .pkl locais.
-# O checksum é verificado pelo downloader antes do treinamento.
 FROM ml-base AS ml-train
 COPY ml/common.py ml/download_data.py ml/train.py ./
 RUN python download_data.py \
     && python train.py --model /artifacts/models/fraud_model.pkl \
         --report /artifacts/reports/metrics.json --examples-dir /artifacts/examples
 
-# Imagem de execução: somente dependências, inferência e artefatos avaliados.
 FROM ml-base AS ml-inference
 ENV ML_PYTHON_EXECUTABLE=/opt/venv/bin/python \
     ML_PREDICT_SCRIPT=/app/ml/predict.py \
@@ -33,7 +29,6 @@ COPY --from=ml-train --chown=10001:10001 /artifacts/ ./
 USER 10001:10001
 ENTRYPOINT ["/opt/venv/bin/python", "/app/ml/predict.py"]
 
-# Compila e testa a API no build, dispensando um JAR prévio no computador.
 FROM maven:3.9-eclipse-temurin-21 AS java-build
 WORKDIR /build
 COPY br.com.faculdadedonaduzzi/pom.xml ./
@@ -42,7 +37,6 @@ RUN mvn --batch-mode --no-transfer-progress package
 
 FROM eclipse-temurin:21-jre-jammy AS java-runtime
 
-# O alvo padrão reúne Java, Python e o modelo no MESMO contêiner.
 FROM ml-inference AS api
 USER root
 RUN apt-get update \
