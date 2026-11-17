@@ -1,0 +1,65 @@
+{
+  "scope": "Inicializacao da API com PostgreSQL e inferencia Python no mesmo container; endpoint HTTP ainda sem integracao ML.",
+  "image": "antifraude-api:ml",
+  "checks": [
+    {
+      "name": "api-health",
+      "command": [
+        "docker",
+        "exec",
+        "31907919b74488cd20e1e22acd58a4f3660cca7fd112b7347ba6619ff1ab37ff",
+        "/opt/venv/bin/python",
+        "-c",
+        "import urllib.request; print(urllib.request.urlopen(\"http://127.0.0.1:8080/actuator/health\", timeout=3).read().decode())"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"groups\":[\"liveness\",\"readiness\"],\"status\":\"UP\"}\n",
+      "stderr": ""
+    },
+    {
+      "name": "inferir-legitima",
+      "command": [
+        "docker",
+        "exec",
+        "31907919b74488cd20e1e22acd58a4f3660cca7fd112b7347ba6619ff1ab37ff",
+        "/opt/venv/bin/python",
+        "/app/ml/predict.py",
+        "--input",
+        "/app/ml/examples/legitima.json"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"status\": \"APROVADO\", \"score_fraude\": 0.017396687369278383, \"limiar\": 0.9999922476121014, \"modelo\": \"ulb-logreg-v1\"}\n",
+      "stderr": ""
+    },
+    {
+      "name": "inferir-fraude",
+      "command": [
+        "docker",
+        "exec",
+        "31907919b74488cd20e1e22acd58a4f3660cca7fd112b7347ba6619ff1ab37ff",
+        "/opt/venv/bin/python",
+        "/app/ml/predict.py",
+        "--input",
+        "/app/ml/examples/fraude.json"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"status\": \"FRAUDE\", \"score_fraude\": 0.9999999999964237, \"limiar\": 0.9999922476121014, \"modelo\": \"ulb-logreg-v1\"}\n",
+      "stderr": ""
+    }
+  ],
+  "passed": true,
+  "cleanup": [
+    {
+      "container": "31907919b74488cd20e1e22acd58a4f3660cca7fd112b7347ba6619ff1ab37ff",
+      "exit_code": 0
+    },
+    {
+      "container": "c848dcb4a545c7222cce7341fc18c3de1fbfa621965515e43fc0a63e493b2224",
+      "exit_code": 0
+    },
+    {
+      "network": "779f7d2e404bb17b08c3c9f32e850ec7decf2e153db588e46c35e305c0be9b05",
+      "exit_code": 0
+    }
+  ]
+}

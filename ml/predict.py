@@ -11,6 +11,16 @@ import warnings
 from common import DEFAULT_MODEL, FEATURES, SCHEMA_VERSION, parse_transaction
 
 
+class PredictionArgumentParser(argparse.ArgumentParser):
+    """Reserva stdout para inferência, inclusive em erros de uso e --help."""
+
+    def error(self, message):
+        self.exit(2, json.dumps({"erro": message}, ensure_ascii=True) + "\n")
+
+    def print_help(self, file=None):
+        super().print_help(file=sys.stderr if file is None else file)
+
+
 def predict(values, model_path):
     """Carrega um artefato local confiável e aplica o mesmo pipeline do treino."""
     # Bibliotecas e eventuais avisos nunca devem contaminar o stdout do Java.
@@ -42,7 +52,10 @@ def predict(values, model_path):
         if (getattr(pipeline, "n_features_in_", None) != len(FEATURES)
                 or list(getattr(pipeline, "classes_", [])) != [0, 1]):
             raise ValueError("Pipeline incompatível com o contrato de fraude.")
-        probabilities = pipeline.predict_proba(np.array([values], dtype=np.float64))
+        # Um número finito de entrada ainda pode transbordar durante o scaler.
+        # Converte esse caso em erro tratado, sem imprimir warnings soltos.
+        with np.errstate(over="raise", invalid="raise", divide="raise"):
+            probabilities = pipeline.predict_proba(np.array([values], dtype=np.float64))
         if probabilities.shape != (1, 2):
             raise ValueError("Formato inesperado de saída do modelo.")
         score = float(probabilities[0, 1])
@@ -59,7 +72,7 @@ def predict(values, model_path):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = PredictionArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument("transacao", nargs="?", help="Objeto JSON como um único argumento.")
     parser.add_argument("--input", type=Path, help="Arquivo JSON UTF-8 (alternativa ao argumento).")
     parser.add_argument("--model", type=Path, default=DEFAULT_MODEL, help="Modelo .pkl local confiável.")

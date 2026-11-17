@@ -15,9 +15,11 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
-
   api:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api
     container_name: antifraude-api
     ports:
       - "8080:8080"
@@ -26,6 +28,5 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-
 volumes:
   pgdata:
