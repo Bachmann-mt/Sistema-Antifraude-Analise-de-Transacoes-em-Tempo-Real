@@ -1,0 +1,15 @@
+# Execução pontual do modelo; independente da API e do PostgreSQL.
+# Uso: docker compose -f docker-compose.ml.yml run --rm ml --input examples/fraude.json
+services:
+  ml:
+    image: antifraude-ml:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: ml-inference
+    network_mode: none
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true

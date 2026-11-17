@@ -198,6 +198,19 @@ class PredictionContractTests(unittest.TestCase):
                 self.assertEqual(result["score_fraude"], 0.5)
                 self.assertEqual(result["status"], status)
 
+    def test_numerical_overflow_is_a_single_json_error(self):
+        pipeline = Pipeline([
+            ("scaler", StandardScaler()),
+            ("classifier", DummyClassifier(strategy="prior")),
+        ]).fit(np.zeros((4, len(common.FEATURES))), [0, 0, 1, 1])
+        pipeline.named_steps["scaler"].scale_[-2] = 0.1
+        path = self.directory / "overflow.pkl"
+        joblib.dump({**self.artifact, "pipeline": pipeline}, path)
+        result = self.invoke(json.dumps(transaction(V28=sys.float_info.max)), model=path)
+        self.assert_failure(result, 1)
+        self.assertEqual(len(result.stderr.splitlines()), 1)
+        self.assertEqual(set(json.loads(result.stderr)), {"erro"})
+
 
 class TrainingIsolationTests(unittest.TestCase):
     def setUp(self):

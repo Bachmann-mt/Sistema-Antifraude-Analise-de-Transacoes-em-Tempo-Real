@@ -28,7 +28,7 @@ def parse_transaction(text):
     """Converte um objeto JSON válido na ordem exata das features de treino."""
     try:
         payload = json.loads(text, object_pairs_hook=reject_duplicate_keys)
-    except json.JSONDecodeError as exc:
+    except (json.JSONDecodeError, RecursionError) as exc:
         raise ValueError("Entrada deve ser um objeto JSON válido.") from exc
     if not isinstance(payload, dict):
         raise ValueError("Entrada deve ser um objeto JSON com os campos da transação.")

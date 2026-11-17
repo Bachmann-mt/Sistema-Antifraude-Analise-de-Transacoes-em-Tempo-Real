@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Contrato de inferência v1. A consistência de status com score_fraude >= limiar é verificada em runtime e nos testes.",
+  "title": "Saída de sucesso da inferência antifraude v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["status", "score_fraude", "limiar", "modelo"],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["FRAUDE", "APROVADO"]
+    },
+    "score_fraude": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Score finito do modelo; não é uma probabilidade calibrada."
+    },
+    "limiar": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Limiar finito salvo no modelo, preservado sem arredondamento."
+    },
+    "modelo": {
+      "type": "string",
+      "minLength": 1,
+      "examples": ["ulb-logreg-v1"]
+    }
+  }
+}
