@@ -24,6 +24,11 @@
     <option name="cachedIndexableFilesCount" value="18" />
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -32,12 +37,12 @@
     &quot;assignee&quot;: &quot;KauanyBloem3r&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/Bachmann-mt/Sistema-Antifraude-Analise-de-Transacoes-em-Tempo-Real.git&quot;,
-    &quot;accountId&quot;: &quot;7740da24-132d-4ed1-880e-75f222f154c0&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Bachmann-mt/Sistema-Antifraude-Analise-de-Transacoes-em-Tempo-Real.git",
+    "accountId": "57b14c97-cf5d-429e-8237-4d020b557706"
   }
-}</component>
+}]]></component>
   <component name="MavenImportPreferences">
     <option name="generalSettings">
       <MavenGeneralSettings>
