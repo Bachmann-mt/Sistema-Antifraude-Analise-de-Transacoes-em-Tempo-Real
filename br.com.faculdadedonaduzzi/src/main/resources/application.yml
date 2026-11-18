@@ -6,3 +6,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+
+ml:
+  python-executable: ${ML_PYTHON_EXECUTABLE:python}
+  script-path: ${ML_PREDICT_SCRIPT:../ml/predict.py}
+  timeout-segundos: ${ML_TIMEOUT_SEGUNDOS:10}
