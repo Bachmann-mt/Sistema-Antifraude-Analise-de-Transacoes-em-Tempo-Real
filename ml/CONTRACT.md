@@ -51,20 +51,13 @@ A decisão é `FRAUDE` quando `score_fraude >= limiar`; caso contrário, é `APR
 
 O modelo usa pesos de classe e seus scores **não são probabilidades calibradas**. Não apresente `score_fraude * 100` como uma chance confiável de fraude. O limiar atualmente treinado está muito próximo de `1`; preserve o valor completo, sem arredondá-lo para `1`.
 
-## Compatibilidade com o backend atual
+## Compatibilidade com o backend
 
-O `TransacaoRequestDTO` atual recebe `idTransacao`, `idUsuario`, `valor`, `localizacao`, `dataHora`, `tipoTransacao`, `dispositivoId` e `estabelecimentoId`. Esses campos comerciais **não satisfazem a entrada deste modelo**. O `TransacaoResponseDTO` usa `scoreRisco` inteiro de `0` a `100`, e o serviço atual produz `SUSPEITO` ou `APROVADO` a partir da regra `scoreRisco >= 70`.
+O `TransacaoRequestDTO` recebe `idTransacao`, `idUsuario` e um objeto `features` do tipo `FeaturesTransacaoDTO`, com exatamente as 30 propriedades definidas neste contrato. Os valores devem vir de transações compatíveis com a base ULB/Worldline; as features PCA não podem ser calculadas a partir de valor comercial, localização ou IDs. Preenchê-las com zeros ou valores inventados não cria uma integração válida.
 
-As variáveis originais e a transformação PCA de `V1` a `V28` não foram publicadas com a base. Portanto, não é possível calculá-las a partir de `valor`, localização, usuário ou outros campos comerciais disponíveis. Preencher essas features com zeros ou valores inventados não cria uma integração válida.
+O serviço Java serializa **somente o objeto completo `features`** para `predict.py`, usando `--input` e um arquivo UTF-8 temporário. A API devolve e persiste a decisão `FRAUDE` ou `APROVADO`, além de `score_fraude`, `limiar` e `modelo`, sem recalcular o status por uma regra baseada em score arredondado. A execução usa `ProcessBuilder`, mantém `stdout` e `stderr` separados, aplica timeout e rejeita saída incompleta, fora dos limites ou inconsistente com a comparação `score_fraude >= limiar`.
 
-Para integrar a demonstração acadêmica, o backend precisa:
-
-1. Receber as 30 features em um DTO específico ou em um objeto aninhado, como `features`, junto aos metadados comerciais. Os valores devem vir de transações no formato da base ULB/Worldline.
-2. Serializar **somente o objeto completo das 30 features** para o Python. Não enviar IDs, o objeto externo ou a propriedade `features` como envelope.
-3. Aceitar `status` como a decisão produzida pelo modelo. Se a API externa mantiver sua nomenclatura, mapear `FRAUDE` para `SUSPEITO` e manter `APROVADO`.
-4. Preservar `score_fraude`, `limiar` e `modelo` com a precisão necessária para rastreabilidade. Se mantiver `scoreRisco`, sua escala e arredondamento precisam ser documentados como apresentação; não recalcular a decisão pela regra antiga `scoreRisco >= 70`.
-
-Essas alterações no backend são necessárias para a integração e não são implementadas por este documento. Para analisar transações comerciais novas sem as features PCA, será necessário outro dataset e um modelo treinado com campos disponíveis na aplicação.
+Para analisar transações comerciais sem as features PCA, será necessário outro dataset e um modelo treinado com campos disponíveis na aplicação.
 
 ## Caminhos e chamada no container
 

@@ -6,7 +6,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -24,31 +23,19 @@ public class AnaliseTransacao {
     @Column(nullable = false, length = 100)
     private String idUsuario;
 
-    @Column(nullable = false, precision = 19, scale = 2)
-    private BigDecimal valor;
-
-    @Column(nullable = false, length = 150)
-    private String localizacao;
-
-    private Instant dataHora;
-
-    @Column(length = 50)
-    private String tipoTransacao;
-
-    @Column(length = 100)
-    private String dispositivoId;
-
-    @Column(length = 100)
-    private String estabelecimentoId;
-
+    /** Decisão retornada pelo modelo: FRAUDE ou APROVADO. */
     @Column(nullable = false, length = 20)
     private String status;
 
+    /** Score do modelo com precisão completa (double precision). */
     @Column(nullable = false)
-    private Integer scoreRisco;
+    private Double scoreFraude;
 
-    @Column(nullable = false, length = 255)
-    private String mensagem;
+    @Column(nullable = false)
+    private Double limiar;
+
+    @Column(nullable = false, length = 100)
+    private String modelo;
 
     @Column(nullable = false)
     private Instant analisadaEm;
@@ -59,28 +46,18 @@ public class AnaliseTransacao {
     public AnaliseTransacao(
             String idTransacao,
             String idUsuario,
-            BigDecimal valor,
-            String localizacao,
-            Instant dataHora,
-            String tipoTransacao,
-            String dispositivoId,
-            String estabelecimentoId,
             String status,
-            Integer scoreRisco,
-            String mensagem,
+            Double scoreFraude,
+            Double limiar,
+            String modelo,
             Instant analisadaEm
     ) {
         this.idTransacao = idTransacao;
         this.idUsuario = idUsuario;
-        this.valor = valor;
-        this.localizacao = localizacao;
-        this.dataHora = dataHora;
-        this.tipoTransacao = tipoTransacao;
-        this.dispositivoId = dispositivoId;
-        this.estabelecimentoId = estabelecimentoId;
         this.status = status;
-        this.scoreRisco = scoreRisco;
-        this.mensagem = mensagem;
+        this.scoreFraude = scoreFraude;
+        this.limiar = limiar;
+        this.modelo = modelo;
         this.analisadaEm = analisadaEm;
     }
 
@@ -88,16 +65,24 @@ public class AnaliseTransacao {
         return idTransacao;
     }
 
+    public String getIdUsuario() {
+        return idUsuario;
+    }
+
     public String getStatus() {
         return status;
     }
 
-    public Integer getScoreRisco() {
-        return scoreRisco;
+    public Double getScoreFraude() {
+        return scoreFraude;
     }
 
-    public String getMensagem() {
-        return mensagem;
+    public Double getLimiar() {
+        return limiar;
+    }
+
+    public String getModelo() {
+        return modelo;
     }
 
     public Instant getAnalisadaEm() {
