@@ -40,6 +40,18 @@ public class ApiExceptionHandler {
         return resposta(HttpStatus.NOT_FOUND, exception.getMessage(), request, Map.of());
     }
 
+    @ExceptionHandler(InferenciaException.class)
+    public ResponseEntity<ErroResponseDTO> tratarInferencia(
+            InferenciaException exception,
+            HttpServletRequest request
+    ) {
+        LOGGER.error("Falha na inferência do modelo: {}", exception.getMessage(), exception);
+        if (exception.isEntradaRecusada()) {
+            return resposta(HttpStatus.BAD_REQUEST, "Features recusadas pelo modelo", request, Map.of());
+        }
+        return resposta(HttpStatus.SERVICE_UNAVAILABLE, "Modelo de inferência indisponível", request, Map.of());
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErroResponseDTO> tratarCorpoInvalido(
             HttpMessageNotReadableException exception,

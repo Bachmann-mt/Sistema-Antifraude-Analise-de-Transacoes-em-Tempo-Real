@@ -3,25 +3,27 @@ package com.projeto_final_microsservicos.br.com.faculdadedonaduzzi.service;
 import com.projeto_final_microsservicos.br.com.faculdadedonaduzzi.dto.TransacaoRequestDTO;
 import com.projeto_final_microsservicos.br.com.faculdadedonaduzzi.dto.TransacaoResponseDTO;
 import com.projeto_final_microsservicos.br.com.faculdadedonaduzzi.exception.AnaliseNaoEncontradaException;
+import com.projeto_final_microsservicos.br.com.faculdadedonaduzzi.ml.ModeloFraudeClient;
+import com.projeto_final_microsservicos.br.com.faculdadedonaduzzi.ml.ResultadoInferencia;
 import com.projeto_final_microsservicos.br.com.faculdadedonaduzzi.model.AnaliseTransacao;
 import com.projeto_final_microsservicos.br.com.faculdadedonaduzzi.repository.TransacaoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 
 @Service
 public class TransacaoService {
 
-    private static final BigDecimal LIMITE_VALOR_ELEVADO = new BigDecimal("10000.00");
     private final TransacaoRepository transacaoRepository;
+    private final ModeloFraudeClient modeloFraudeClient;
 
-    public TransacaoService(TransacaoRepository transacaoRepository) {
+    public TransacaoService(TransacaoRepository transacaoRepository, ModeloFraudeClient modeloFraudeClient) {
         this.transacaoRepository = transacaoRepository;
+        this.modeloFraudeClient = modeloFraudeClient;
     }
 
-    @Transactional
+    /** Sem transação aberta durante o subprocesso; o save do repositório é transacional. */
     public TransacaoResponseDTO analisarTransacao(TransacaoRequestDTO request) {
         return transacaoRepository.findByIdTransacao(request.idTransacao())
                 .map(this::toResponse)
@@ -36,42 +38,29 @@ public class TransacaoService {
     }
 
     private TransacaoResponseDTO executarAnalise(TransacaoRequestDTO request) {
-        int scoreRisco = calcularScore(request);
-        String status = scoreRisco >= 70 ? "SUSPEITO" : "APROVADO";
-        String mensagem = scoreRisco >= 70
-                ? "Alerta: transação com valor elevado"
-                : "Transação dentro do padrão regular";
-        Instant analisadaEm = Instant.now();
+        ResultadoInferencia resultado = modeloFraudeClient.inferir(request.features());
 
         AnaliseTransacao analise = new AnaliseTransacao(
                 request.idTransacao(),
                 request.idUsuario(),
-                request.valor(),
-                request.localizacao(),
-                request.dataHora(),
-                request.tipoTransacao(),
-                request.dispositivoId(),
-                request.estabelecimentoId(),
-                status,
-                scoreRisco,
-                mensagem,
-                analisadaEm
+                resultado.status(),
+                resultado.scoreFraude(),
+                resultado.limiar(),
+                resultado.modelo(),
+                Instant.now()
         );
 
         return toResponse(transacaoRepository.save(analise));
     }
 
-    /* Ponto de integração a ser substituído pela inferência do modelo da equipe de ML. */
-    private int calcularScore(TransacaoRequestDTO request) {
-        return request.valor().compareTo(LIMITE_VALOR_ELEVADO) > 0 ? 85 : 10;
-    }
-
     private TransacaoResponseDTO toResponse(AnaliseTransacao analise) {
         return new TransacaoResponseDTO(
                 analise.getIdTransacao(),
+                analise.getIdUsuario(),
                 analise.getStatus(),
-                analise.getScoreRisco(),
-                analise.getMensagem(),
+                analise.getScoreFraude(),
+                analise.getLimiar(),
+                analise.getModelo(),
                 analise.getAnalisadaEm()
         );
     }
