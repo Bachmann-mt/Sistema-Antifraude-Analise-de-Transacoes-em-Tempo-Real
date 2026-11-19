@@ -7,3 +7,7 @@ __pycache__/
 /ml/data/*.part
 /ml/models/*.pkl
 
+# Arquivos pessoais do IntelliJ, sem impacto no projeto.
+/.idea/workspace.xml
+/.idea/shelf/
+
