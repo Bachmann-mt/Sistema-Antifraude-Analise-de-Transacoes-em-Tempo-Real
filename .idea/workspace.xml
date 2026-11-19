@@ -4,16 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cbe6da23-6ef8-453c-aa14-af533bac72c6" name="Changes" comment="parcial">
+    <list default="true" id="cbe6da23-6ef8-453c-aa14-af533bac72c6" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/br.com.faculdadedonaduzzi/src/main/java/com/projeto_final_microsservicos/br/com/faculdadedonaduzzi/controller/TransacaoController.java" beforeDir="false" afterPath="$PROJECT_DIR$/br.com.faculdadedonaduzzi/src/main/java/com/projeto_final_microsservicos/br/com/faculdadedonaduzzi/controller/TransacaoController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/br.com.faculdadedonaduzzi/src/main/java/com/projeto_final_microsservicos/br/com/faculdadedonaduzzi/dto/TransacaoRequestDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/br.com.faculdadedonaduzzi/src/main/java/com/projeto_final_microsservicos/br/com/faculdadedonaduzzi/dto/TransacaoRequestDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/br.com.faculdadedonaduzzi/src/main/java/com/projeto_final_microsservicos/br/com/faculdadedonaduzzi/dto/TransacaoResponseDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/br.com.faculdadedonaduzzi/src/main/java/com/projeto_final_microsservicos/br/com/faculdadedonaduzzi/dto/TransacaoResponseDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/br.com.faculdadedonaduzzi/src/main/java/com/projeto_final_microsservicos/br/com/faculdadedonaduzzi/exception/ApiExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/br.com.faculdadedonaduzzi/src/main/java/com/projeto_final_microsservicos/br/com/faculdadedonaduzzi/exception/ApiExceptionHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/br.com.faculdadedonaduzzi/src/main/java/com/projeto_final_microsservicos/br/com/faculdadedonaduzzi/model/AnaliseTransacao.java" beforeDir="false" afterPath="$PROJECT_DIR$/br.com.faculdadedonaduzzi/src/main/java/com/projeto_final_microsservicos/br/com/faculdadedonaduzzi/model/AnaliseTransacao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/br.com.faculdadedonaduzzi/src/main/java/com/projeto_final_microsservicos/br/com/faculdadedonaduzzi/service/TransacaoService.java" beforeDir="false" afterPath="$PROJECT_DIR$/br.com.faculdadedonaduzzi/src/main/java/com/projeto_final_microsservicos/br/com/faculdadedonaduzzi/service/TransacaoService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/br.com.faculdadedonaduzzi/src/main/java/com/projeto_final_microsservicos/br/com/faculdadedonaduzzi/ml/ModeloFraudeClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/br.com.faculdadedonaduzzi/src/main/java/com/projeto_final_microsservicos/br/com/faculdadedonaduzzi/ml/ModeloFraudeClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/br.com.faculdadedonaduzzi/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/br.com.faculdadedonaduzzi/src/main/resources/application.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/br.com.faculdadedonaduzzi/src/test/java/com/projeto_final_microsservicos/br/com/faculdadedonaduzzi/ApplicationTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/br.com.faculdadedonaduzzi/src/test/java/com/projeto_final_microsservicos/br/com/faculdadedonaduzzi/ApplicationTests.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/br.com.faculdadedonaduzzi/src/test/java/com/projeto_final_microsservicos/br/com/faculdadedonaduzzi/service/TransacaoServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/br.com.faculdadedonaduzzi/src/test/java/com/projeto_final_microsservicos/br/com/faculdadedonaduzzi/service/TransacaoServiceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ml/CONTRACT.md" beforeDir="false" afterPath="$PROJECT_DIR$/ml/CONTRACT.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -21,7 +18,8 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="18" />
+    <option name="cachedIndexableFilesCount" value="28" />
+    <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
@@ -37,12 +35,12 @@
     &quot;assignee&quot;: &quot;KauanyBloem3r&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Bachmann-mt/Sistema-Antifraude-Analise-de-Transacoes-em-Tempo-Real.git",
-    "accountId": "57b14c97-cf5d-429e-8237-4d020b557706"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Bachmann-mt/Sistema-Antifraude-Analise-de-Transacoes-em-Tempo-Real.git&quot;,
+    &quot;accountId&quot;: &quot;57b14c97-cf5d-429e-8237-4d020b557706&quot;
   }
-}]]></component>
+}</component>
   <component name="MavenImportPreferences">
     <option name="generalSettings">
       <MavenGeneralSettings>
@@ -56,23 +54,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.3442064476055906" />
-      <entry key="MS500" value="2.955881048434269" />
-      <entry key="S2" value="4.789374839908979" />
-      <entry key="S5" value="5.45928039933612" />
-      <entry key="S10" value="5.720244767892805" />
-      <entry key="S30" value="6.5565710439899245" />
-      <entry key="S60" value="9.49555223513275" />
-      <entry key="M2" value="14.355621022904785" />
-      <entry key="M5" value="20.09742034394641" />
-      <entry key="M10" value="22.78922297532901" />
-      <entry key="M15" value="23.797178842299804" />
-      <entry key="M30" value="24.866189053802856" />
-      <entry key="H1" value="25.424751377732463" />
-      <entry key="H2" value="25.71025871366344" />
-      <entry key="H4" value="25.854596163029353" />
-      <entry key="D1" value="25.97569163479141" />
-      <entry key="W1" value="25.996525550124762" />
+      <entry key="MS100" value="1.0003830977576351" />
+      <entry key="MS500" value="1.235492950619922" />
+      <entry key="S2" value="4.1511432738581" />
+      <entry key="S5" value="8.480515639930989" />
+      <entry key="S10" value="11.189440537344561" />
+      <entry key="S30" value="13.64060591728049" />
+      <entry key="S60" value="14.513173714445744" />
+      <entry key="M2" value="15.122639125357844" />
+      <entry key="M5" value="15.604099521629651" />
+      <entry key="M10" value="15.79311990911097" />
+      <entry key="M15" value="15.85997216445604" />
+      <entry key="M30" value="15.928899506424326" />
+      <entry key="H1" value="15.964171797874656" />
+      <entry key="H2" value="15.98201560480866" />
+      <entry key="H4" value="15.990990127168999" />
+      <entry key="D1" value="15.9984958909533" />
+      <entry key="W1" value="15.99978506683307" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -94,23 +92,23 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.2584608391156007" />
-      <entry key="MS500" value="2.910209124436339" />
-      <entry key="S2" value="4.767648619913825" />
-      <entry key="S5" value="5.448970605854119" />
-      <entry key="S10" value="5.7147572523920624" />
-      <entry key="S30" value="6.5517234109505145" />
-      <entry key="S60" value="9.48619459900511" />
-      <entry key="M2" value="14.344966504267589" />
-      <entry key="M5" value="20.090278173644524" />
-      <entry key="M10" value="22.784970452044803" />
-      <entry key="M15" value="23.794173183591752" />
-      <entry key="M30" value="24.86459559201787" />
-      <entry key="H1" value="25.42393094120861" />
-      <entry key="H2" value="25.70984243333139" />
-      <entry key="H4" value="25.854386490084313" />
-      <entry key="D1" value="25.975656474935175" />
-      <entry key="W1" value="25.996520522018994" />
+      <entry key="MS100" value="7.531457459595909E-4" />
+      <entry key="MS500" value="0.4411402027227002" />
+      <entry key="S2" value="3.8162333426384007" />
+      <entry key="S5" value="8.324583029398386" />
+      <entry key="S10" value="11.106509029289338" />
+      <entry key="S30" value="13.610831543727508" />
+      <entry key="S60" value="14.496787384576853" />
+      <entry key="M2" value="15.113498674948223" />
+      <entry key="M5" value="15.60005538219389" />
+      <entry key="M10" value="15.791013095794861" />
+      <entry key="M15" value="15.858546975851793" />
+      <entry key="M30" value="15.928176098405565" />
+      <entry key="H1" value="15.9638072947739" />
+      <entry key="H2" value="15.981832641194176" />
+      <entry key="H4" value="15.990898465788009" />
+      <entry key="D1" value="15.998480588982456" />
+      <entry key="W1" value="15.999782880221435" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -124,22 +122,29 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
-    &quot;Application.Application.executor&quot;: &quot;Run&quot;,
     &quot;Downloaded.Files.Path.Enabled&quot;: &quot;true&quot;,
     &quot;Maven.br.com.faculdadedonaduzzi [clean].executor&quot;: &quot;Run&quot;,
     &quot;Maven.br.com.faculdadedonaduzzi [install].executor&quot;: &quot;Run&quot;,
     &quot;Repository.Attach.Annotations&quot;: &quot;false&quot;,
     &quot;Repository.Attach.JavaDocs&quot;: &quot;false&quot;,
     &quot;Repository.Attach.Sources&quot;: &quot;false&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
     &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;Spring Boot.Application.executor&quot;: &quot;Run&quot;,
     &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feature/api-contrato-ml&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature/api-integracao-python&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/ADM/Sistema-Antifraude-Analise-de-Transacoes-em-Tempo-Real&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/run/media/isaacnilsonv/dados/Documents/5-Semestre-IA-BPK/Microsserviços_para_Ciência_de_Dados/ProjetoFinal/Sistema-Antifraude-Analise-de-Transacoes-em-Tempo-Real&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -148,14 +153,23 @@
     &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
     &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
     &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
+    &quot;settings.editor.selected.configurable&quot;: &quot;MavenSettings&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="RunManager">
+    <configuration name="Application" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="br.com.faculdadedonaduzzi" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.projeto_final_microsservicos.br.com.faculdadedonaduzzi.Application" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
         <option value="bundled-jdk-30f59d01ecdd-63390994e64e-intellij.indexing.shared.core-IU-262.8665.337" />
-        <option value="bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-IU-262.8665.337" />
       </set>
     </attachedChunks>
   </component>
@@ -182,13 +196,5 @@
         </entry>
       </map>
     </option>
-  </component>
-  <component name="VcsManagerConfiguration">
-    <MESSAGE value="parcial" />
-    <option name="LAST_COMMIT_MESSAGE" value="parcial" />
-  </component>
-  <component name="XSLT-Support.FileAssociations.UIState">
-    <expand />
-    <select />
   </component>
 </project>

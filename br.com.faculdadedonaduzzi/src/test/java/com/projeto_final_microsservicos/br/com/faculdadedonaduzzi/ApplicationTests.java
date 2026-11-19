@@ -1,21 +1,22 @@
 package com.projeto_final_microsservicos.br.com.faculdadedonaduzzi;
 
-import com.projeto_final_microsservicos.br.com.faculdadedonaduzzi.ml.ModeloFraudeClient;
-import com.projeto_final_microsservicos.br.com.faculdadedonaduzzi.ml.ResultadoInferencia;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Path;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ApplicationTests {
@@ -23,9 +24,13 @@ class ApplicationTests {
 	@LocalServerPort
 	private int port;
 
-	// O predict.py não existe no ambiente de testes Maven; a CLI é verificada em ml/test_container.py.
-	@MockitoBean
-	private ModeloFraudeClient modeloFraudeClient;
+	@DynamicPropertySource
+	static void configurarModeloDaFixture(DynamicPropertyRegistry registry) {
+		registry.add("ml.python-executable", () -> System.getProperty("ml.test.python", "python"));
+		registry.add("ml.script-path", ApplicationTests::scriptFixture);
+		registry.add("ml.model-path", () -> "api-success");
+		registry.add("ml.timeout-segundos", () -> "5");
+	}
 
 	@Test
 	void contextLoads() {
@@ -44,15 +49,88 @@ class ApplicationTests {
 
 	@Test
 	void deveAnalisarEPersistirOResultadoDaInferencia() throws Exception {
-		when(modeloFraudeClient.inferir(any())).thenReturn(
-				new ResultadoInferencia("FRAUDE", 0.9999999999964237, 0.9999922476121025, "ulb-logreg-v1"));
-		// Mesmo formato de exemplos/requisicao-analisar.json (amostra ml/examples/fraude.json).
-		String json = """
+		Assumptions.assumeTrue(pythonDisponivel(), "Python indisponível; teste de integração ignorado");
+		String json = requisicaoJson("TX-INTEGRACAO-1", 146022.0);
+		HttpRequest post = HttpRequest.newBuilder(uri("/api/v1/transacoes/analisar"))
+				.header("Content-Type", "application/json")
+				.POST(HttpRequest.BodyPublishers.ofString(json))
+				.build();
+
+		HttpResponse<String> analise = enviar(post);
+		HttpResponse<String> consulta = enviar(HttpRequest.newBuilder(
+				uri("/api/v1/transacoes/TX-INTEGRACAO-1")).GET().build());
+
+		assertEquals(200, analise.statusCode());
+		assertTrue(analise.body().contains("\"status\":\"FRAUDE\""));
+		assertTrue(analise.body().contains("\"scoreFraude\":0.9999999999964237"));
+		assertTrue(analise.body().contains("\"limiar\":0.9999922476121025"));
+		assertEquals(200, consulta.statusCode());
+		assertTrue(consulta.body().contains("\"idTransacao\":\"TX-INTEGRACAO-1\""));
+		assertTrue(consulta.body().contains("\"status\":\"FRAUDE\""));
+		assertTrue(consulta.body().contains("\"scoreFraude\":0.9999999999964237"));
+		assertTrue(consulta.body().contains("\"modelo\":\"fixture-v1\""));
+	}
+
+	@Test
+	void naoDevePersistirQuandoProcessoPythonFalha() throws Exception {
+		Assumptions.assumeTrue(pythonDisponivel(), "Python indisponível; teste de integração ignorado");
+		String json = requisicaoJson("TX-INTEGRACAO-ERRO", 0.0);
+		HttpRequest post = HttpRequest.newBuilder(uri("/api/v1/transacoes/analisar"))
+				.header("Content-Type", "application/json")
+				.POST(HttpRequest.BodyPublishers.ofString(json))
+				.build();
+
+		HttpResponse<String> falha = enviar(post);
+		HttpResponse<String> consulta = enviar(HttpRequest.newBuilder(
+				uri("/api/v1/transacoes/TX-INTEGRACAO-ERRO")).GET().build());
+
+		assertEquals(503, falha.statusCode());
+		assertEquals(404, consulta.statusCode());
+	}
+
+	@Test
+	void deveRecusarRequisicaoSemFeatures() throws Exception {
+		HttpRequest post = HttpRequest.newBuilder(uri("/api/v1/transacoes/analisar"))
+				.header("Content-Type", "application/json")
+				.POST(HttpRequest.BodyPublishers.ofString(
+						"{\"idTransacao\":\"TX-SEM-FEATURES\",\"idUsuario\":\"USR-1\"}"))
+				.build();
+
+		assertEquals(400, enviar(post).statusCode());
+	}
+
+	private URI uri(String caminho) {
+		return URI.create("http://localhost:" + port + caminho);
+	}
+
+	private static String scriptFixture() {
+		try {
+			return Path.of(ApplicationTests.class.getResource("/python/fake_predict.py").toURI()).toString();
+		} catch (Exception exception) {
+			throw new IllegalStateException("Fixture Python não encontrada", exception);
+		}
+	}
+
+	private static boolean pythonDisponivel() {
+		try {
+			Process processo = new ProcessBuilder(System.getProperty("ml.test.python", "python"), "--version")
+					.redirectErrorStream(true).start();
+			return processo.waitFor(5, TimeUnit.SECONDS) && processo.exitValue() == 0;
+		} catch (IOException | InterruptedException exception) {
+			if (exception instanceof InterruptedException) {
+				Thread.currentThread().interrupt();
+			}
+			return false;
+		}
+	}
+
+	private static String requisicaoJson(String idTransacao, double time) {
+		return """
 				{
-				  "idTransacao": "TX-INTEGRACAO-1",
+				  "idTransacao": "%s",
 				  "idUsuario": "USR-001",
 				  "features": {
-				    "Time": 146022.0,
+				    "Time": %s,
 				    "V1": 0.908636658181293,
 				    "V2": 2.84902401493181,
 				    "V3": -5.64734296336341,
@@ -84,37 +162,7 @@ class ApplicationTests {
 				    "Amount": 1.18
 				  }
 				}
-				""";
-		HttpRequest post = HttpRequest.newBuilder(uri("/api/v1/transacoes/analisar"))
-				.header("Content-Type", "application/json")
-				.POST(HttpRequest.BodyPublishers.ofString(json))
-				.build();
-
-		HttpResponse<String> analise = enviar(post);
-		HttpResponse<String> consulta = enviar(HttpRequest.newBuilder(
-				uri("/api/v1/transacoes/TX-INTEGRACAO-1")).GET().build());
-
-		assertEquals(200, analise.statusCode());
-		assertTrue(analise.body().contains("\"status\":\"FRAUDE\""));
-		assertTrue(analise.body().contains("\"scoreFraude\":0.9999999999964237"));
-		assertEquals(200, consulta.statusCode());
-		assertTrue(consulta.body().contains("TX-INTEGRACAO-1"));
-		assertTrue(consulta.body().contains("\"modelo\":\"ulb-logreg-v1\""));
-	}
-
-	@Test
-	void deveRecusarRequisicaoSemFeatures() throws Exception {
-		HttpRequest post = HttpRequest.newBuilder(uri("/api/v1/transacoes/analisar"))
-				.header("Content-Type", "application/json")
-				.POST(HttpRequest.BodyPublishers.ofString(
-						"{\"idTransacao\":\"TX-SEM-FEATURES\",\"idUsuario\":\"USR-1\"}"))
-				.build();
-
-		assertEquals(400, enviar(post).statusCode());
-	}
-
-	private URI uri(String caminho) {
-		return URI.create("http://localhost:" + port + caminho);
+				""".formatted(idTransacao, time);
 	}
 
 	private HttpResponse<String> enviar(HttpRequest request) throws Exception {

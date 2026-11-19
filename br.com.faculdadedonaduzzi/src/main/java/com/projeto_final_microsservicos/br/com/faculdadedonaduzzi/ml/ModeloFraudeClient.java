@@ -5,6 +5,7 @@ import com.projeto_final_microsservicos.br.com.faculdadedonaduzzi.exception.Infe
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
@@ -14,7 +15,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -24,6 +27,8 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class ModeloFraudeClient {
 
+    private static final Set<String> CAMPOS_SAIDA = Set.of("status", "score_fraude", "limiar", "modelo");
+
     private final JsonMapper jsonMapper;
     private final String pythonExecutavel;
     private final String scriptPredicao;
@@ -32,10 +37,10 @@ public class ModeloFraudeClient {
 
     public ModeloFraudeClient(
             JsonMapper jsonMapper,
-            @Value("${ML_PYTHON_EXECUTABLE:/opt/venv/bin/python}") String pythonExecutavel,
-            @Value("${ML_PREDICT_SCRIPT:/app/ml/predict.py}") String scriptPredicao,
-            @Value("${ML_MODEL_PATH:/app/ml/models/fraud_model.pkl}") String caminhoModelo,
-            @Value("${ML_TIMEOUT_SEGUNDOS:30}") long timeoutSegundos
+            @Value("${ml.python-executable}") String pythonExecutavel,
+            @Value("${ml.script-path}") String scriptPredicao,
+            @Value("${ml.model-path}") String caminhoModelo,
+            @Value("${ml.timeout-segundos}") long timeoutSegundos
     ) {
         this.jsonMapper = jsonMapper;
         this.pythonExecutavel = pythonExecutavel;
@@ -74,9 +79,14 @@ public class ModeloFraudeClient {
                     "--input", entrada.toString(),
                     "--model", caminhoModelo
             )).start();
-            processo.getOutputStream().close();
         } catch (IOException e) {
             throw new InferenciaException("Não foi possível iniciar o Python em " + pythonExecutavel, e);
+        }
+        try {
+            processo.getOutputStream().close();
+        } catch (IOException e) {
+            finalizar(processo);
+            throw new InferenciaException("Falha ao fechar a entrada do processo Python", e);
         }
 
         CompletableFuture<String> stdout = CompletableFuture.supplyAsync(() -> ler(processo.getInputStream()));
@@ -86,35 +96,100 @@ public class ModeloFraudeClient {
         try {
             concluido = processo.waitFor(timeoutSegundos, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            processo.destroyForcibly();
+            encerrar(processo, stdout, stderr);
             Thread.currentThread().interrupt();
             throw new InferenciaException("Inferência interrompida", e);
         }
         if (!concluido) {
-            processo.destroyForcibly();
+            encerrar(processo, stdout, stderr);
             throw new InferenciaException("Tempo limite de " + timeoutSegundos + "s excedido na inferência", false);
         }
 
         int exitCode = processo.exitValue();
+        String erro = obterSaida(stderr, "stderr").strip();
         if (exitCode != 0) {
-            String erro = stderr.join().strip();
             throw new InferenciaException("Modelo retornou código " + exitCode + ": " + erro, exitCode == 2);
         }
-        return interpretar(stdout.join());
+        return interpretar(obterSaida(stdout, "stdout"));
     }
 
     private ResultadoInferencia interpretar(String saida) {
-        ResultadoInferencia resultado;
+        JsonNode json;
         try {
-            resultado = jsonMapper.readValue(saida, ResultadoInferencia.class);
+            json = jsonMapper.readTree(saida);
         } catch (JacksonException e) {
             throw new InferenciaException("Saída do modelo fora do contrato: " + saida.strip(), e);
         }
-        if (resultado.status() == null || resultado.scoreFraude() == null
-                || resultado.limiar() == null || resultado.modelo() == null) {
+        if (json == null || !json.isObject()) {
+            throw new InferenciaException("Saída do modelo fora do contrato: " + saida.strip(), false);
+        }
+        if (json.size() != CAMPOS_SAIDA.size()
+                || json.get("status") == null
+                || json.get("score_fraude") == null
+                || json.get("limiar") == null
+                || json.get("modelo") == null) {
+            throw new InferenciaException("Campos da saída do modelo fora do contrato: " + saida.strip(), false);
+        }
+
+        JsonNode statusNode = json.get("status");
+        JsonNode scoreNode = json.get("score_fraude");
+        JsonNode limiarNode = json.get("limiar");
+        JsonNode modeloNode = json.get("modelo");
+        if (statusNode == null || !statusNode.isString()
+                || scoreNode == null || !scoreNode.isNumber()
+                || limiarNode == null || !limiarNode.isNumber()
+                || modeloNode == null || !modeloNode.isString()) {
             throw new InferenciaException("Saída do modelo incompleta: " + saida.strip(), false);
         }
-        return resultado;
+
+        String status = statusNode.stringValue();
+        double score = scoreNode.doubleValue();
+        double limiar = limiarNode.doubleValue();
+        String modelo = modeloNode.stringValue();
+        if (!Double.isFinite(score) || score < 0 || score > 1
+                || !Double.isFinite(limiar) || limiar < 0 || limiar > 1
+                || modelo.isEmpty()
+                || !(status.equals("FRAUDE") || status.equals("APROVADO"))) {
+            throw new InferenciaException("Valores da saída do modelo fora do contrato: " + saida.strip(), false);
+        }
+        String statusEsperado = score >= limiar ? "FRAUDE" : "APROVADO";
+        if (!status.equals(statusEsperado)) {
+            throw new InferenciaException("Decisão do modelo inconsistente com score_fraude e limiar", false);
+        }
+        return new ResultadoInferencia(status, score, limiar, modelo);
+    }
+
+    private String obterSaida(CompletableFuture<String> saida, String canal) {
+        try {
+            return saida.join();
+        } catch (CompletionException e) {
+            throw new InferenciaException("Falha ao ler " + canal + " do processo Python", e.getCause());
+        }
+    }
+
+    private static void encerrar(
+            Process processo,
+            CompletableFuture<String> stdout,
+            CompletableFuture<String> stderr
+    ) {
+        finalizar(processo);
+        stdout.cancel(true);
+        stderr.cancel(true);
+        try {
+            processo.getInputStream().close();
+            processo.getErrorStream().close();
+        } catch (IOException ignored) {
+            // O processo já foi finalizado; streams são apenas recursos auxiliares.
+        }
+    }
+
+    private static void finalizar(Process processo) {
+        processo.destroyForcibly();
+        try {
+            processo.waitFor();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     private static String ler(InputStream stream) {

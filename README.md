@@ -2,7 +2,7 @@
 
 Projeto acadêmico com uma API REST em Java para registrar e consultar análises de transações e um módulo Python para treinar e executar um modelo de detecção de fraude.
 
-> **Estado da integração:** a API Java ainda calcula o risco por uma regra provisória baseada no valor da transação. A integração do endpoint com o modelo Python está em andamento; um HTTP 200 da versão atual não comprova inferência da IA.
+> **Integração:** o endpoint envia as 30 features da requisição para `ml/predict.py`, devolve a decisão e os scores do modelo e persiste esses mesmos valores. A API não deriva as features do valor comercial da transação.
 
 ## Equipe
 
@@ -28,7 +28,7 @@ Projeto acadêmico com uma API REST em Java para registrar e consultar análises
 
 - Git e Docker com o plugin Compose. A execução em contêineres não exige Java, Maven ou Python instalados no computador.
 - Na primeira construção da imagem, é necessária conexão à internet para baixar imagens, dependências e o dataset usado no treinamento do modelo.
-- Para executar a API fora do Docker: Java 21 e um PostgreSQL disponível em `localhost:5432`, com banco, usuário e senha `antifraude` (configuração atual em `application.yml`).
+- Para executar a API fora do Docker: Java 21, Python 3.11 a 3.14 com as dependências de `ml/requirements.txt`, modelo treinado em `ml/models/fraud_model.pkl` e PostgreSQL disponível em `localhost:5432` (banco, usuário e senha `antifraude`).
 
 ### Executar com Docker Compose
 
@@ -51,19 +51,19 @@ Para executar somente o banco em Docker e a API localmente, inicie `docker compo
 | `POST` | `/api/v1/transacoes/analisar` | Analisa e salva uma transação; se o ID já existir, retorna a análise salva. |
 | `GET` | `/api/v1/transacoes/{idTransacao}` | Consulta uma análise pelo ID; retorna `404` se não existir. |
 
-Exemplo do contrato **atual**, que ainda usa a regra provisória do Java:
+O `POST` exige `idTransacao`, `idUsuario` e um objeto `features` com exatamente `Time`, `V1` a `V28` e `Amount`. Use o [exemplo completo de requisição](br.com.faculdadedonaduzzi/exemplos/requisicao-analisar.json):
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/transacoes/analisar \
   -H 'Content-Type: application/json' \
-  -d '{"idTransacao":"TX-001","idUsuario":"USR-001","valor":1250.00,"localizacao":"São Paulo - SP","tipoTransacao":"PIX"}'
+  -d @br.com.faculdadedonaduzzi/exemplos/requisicao-analisar.json
 ```
 
-Uma resposta contém `idTransacao`, `status`, `scoreRisco`, `mensagem` e `analisadaEm`. No estado atual, valores **maiores que 10000,00** recebem score `85` e status `SUSPEITO`; os demais recebem score `10` e status `APROVADO`. Essa regra serve apenas como ponto provisório de integração. O exemplo definitivo para o Swagger deve ser atualizado após a integração do DTO com as 30 features do modelo.
+Uma resposta contém `idTransacao`, `idUsuario`, `status`, `scoreFraude`, `limiar`, `modelo` e `analisadaEm`. `status` é a decisão produzida pelo Python (`FRAUDE` ou `APROVADO`); o backend preserva o score e o limiar sem recalcular a decisão por uma regra comercial. Features recusadas pelo modelo retornam HTTP 400; falhas de execução ou timeout retornam HTTP 503 e não criam registro.
 
 ## Modelo Python e evidência de MLOps
 
-O módulo usa o dataset **Credit Card Fraud Detection (ULB/Worldline)**. Seu contrato exige `Time`, `V1` a `V28` e `Amount`, campos que não podem ser obtidos apenas da requisição atual da API Java. Consulte o [guia do módulo ML](ml/README.md) para detalhes do dataset, métricas, validações e limitações.
+O módulo usa o dataset **Credit Card Fraud Detection (ULB/Worldline)**. Seu contrato exige `Time`, `V1` a `V28` e `Amount`; esses campos precisam vir de dados compatíveis com o dataset e não podem ser deduzidos de valores comerciais, localização ou IDs. Consulte o [guia do módulo ML](ml/README.md) para detalhes do dataset, métricas, validações e limitações.
 
 Com Python **3.11 a 3.14**, execute na raiz do repositório:
 
@@ -78,17 +78,17 @@ python3 -m venv ml/.venv
 
 No Windows PowerShell, crie o ambiente com `python -m venv ml/.venv` e substitua `./ml/.venv/bin/python` por `.\ml\.venv\Scripts\python.exe`. O download requer internet; o treinamento gera `ml/models/fraud_model.pkl` localmente. O ambiente virtual, o CSV e o modelo não são versionados e precisam ser recriados em uma nova instalação.
 
-As duas chamadas acima demonstram apenas a inferência isolada. O arquivo [`ml/reports/evidencia-terminal.txt`](ml/reports/evidencia-terminal.txt) registra uma execução anterior; ele não substitui a evidência do fluxo API → Python → PostgreSQL.
+As duas chamadas acima demonstram apenas a inferência isolada. O arquivo [`ml/reports/evidencia-terminal.txt`](ml/reports/evidencia-terminal.txt) registra uma execução anterior; ele não substitui a evidência de uma requisição passando pela API e sendo persistida no PostgreSQL. Fora do Docker, configure `ML_PYTHON_EXECUTABLE`, `ML_PREDICT_SCRIPT`, `ML_MODEL_PATH` e `ML_TIMEOUT_SEGUNDOS` se os defaults locais não corresponderem ao ambiente.
 
 ## Verificação da entrega final
 
-Depois da integração do endpoint com o modelo, envie uma transação pelo Swagger e confirme o HTTP 200 e a resposta da IA. Consulte o registro correspondente no PostgreSQL:
+Com a API e o modelo disponíveis, envie o exemplo completo pelo Swagger ou pelo `curl` acima e confirme que a resposta contém `status`, `scoreFraude`, `limiar` e `modelo`. Consulte o registro correspondente no PostgreSQL:
 
 ```bash
-docker compose exec -T postgres psql -U antifraude -d antifraude -c 'SELECT id_transacao, status, score_risco, analisada_em FROM analises_transacao ORDER BY analisada_em DESC;'
+docker compose exec -T postgres psql -U antifraude -d antifraude -c 'SELECT id_transacao, status, score_fraude, limiar, modelo, analisada_em FROM analises_transacao ORDER BY analisada_em DESC;'
 ```
 
-Para a submissão no D2L, reúna em um PDF o link público do repositório, um print do Swagger com HTTP 200 e dos logs do Compose em execução, e um print do `SELECT` com o resultado da mesma transação. A resposta atual da regra provisória não deve ser apresentada como inferência do modelo.
+Para a submissão no D2L, reúna em um PDF o link público do repositório, um print do Swagger com HTTP 200 e dos logs do Compose em execução, e um print do `SELECT` com o resultado da mesma transação.
 
 ## Testes
 
